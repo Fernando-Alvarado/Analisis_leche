@@ -1,2 +1,2 @@
 # Analisis_leche
-Proyecto donde analisamos series de tiempo de leche
+Proyecto donde analizamos series de tiempo de leche
