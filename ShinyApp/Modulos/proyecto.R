@@ -8,10 +8,12 @@ library(TSA)          # Version 1.3.1
 library(here)         # Version 1.0.1
 
 
-source(here("plot_ts.R"))
+
+
+source(here("ShinyApp", "Modulos" ,"plot_ts.R"))
 
 ## Leemos los datos
-milk = read.csv(here("Milk and Pigs Slaughtered.csv"))
+milk = read.csv(here("Data", "Milk_and_Pigs_Slaughtered.csv"), header = TRUE)
 milk = milk$milk
 milk = ts(milk)
 plot_TS(milk)
@@ -108,23 +110,25 @@ checkresiduals(mod)
 # Ajustamos el modelo
 # Usamos un ajueste aditivo ya que parece haber ciclos y la amplitud de 
 # nuestro ciclo no se modifica con el paso del tiempo
-
-milk = read.csv(here("Milk and Pigs Slaughtered.csv"))
+milk = read.csv(here("Data", "Milk_and_Pigs_Slaughtered.csv"), header = TRUE)
 milk = milk$milk
 milk = ts(milk, frequency = 12)
 hw_model = HoltWinters(milk, 
                        seasonal = "additive",
                        start.periods = 12)
 
+
+
+
 print(hw_model)
 summary(hw_model)
 
-## Observemos los residuales, la gráfica no parece tan convincente, pero 
+## Observemos los residuales, la grï¿½fica no parece tan convincente, pero 
 # pero no es evidencia para concluir.
 checkresiduals(hw_model)
 
 # ============================================================================
-# Predicción con Holt-Winters
+# Predicciï¿½n con Holt-Winters
 # ============================================================================
 
 # Predecimos 24 meses
@@ -132,12 +136,12 @@ hw_forecast = forecast(hw_model, h = 24)
 
 # Graficamos
 plot(hw_forecast, 
-     main = "Holt-Winters Predicción",
+     main = "Holt-Winters Predicciï¿½n",
      ylab = "Milk Production",
      xlab = "Time")
 
 # ============================================================================
-# Análisis de residuales
+# Anï¿½lisis de residuales
 # ============================================================================
 
 # Hacemos un dataframe con los residuales del modelo
@@ -145,7 +149,7 @@ hw_residuals = residuals(hw_model)
 n_hw = length(hw_residuals)
 df_res_hw = data.frame(x = c(1:n_hw), y = as.numeric(hw_residuals))
 
-# Graficamos los residuales, la gráfica es muy parecida a la de los 
+# Graficamos los residuales, la grï¿½fica es muy parecida a la de los 
 # residuales del SARIMA
 ggplot(data = df_res_hw, aes(x = x, y = y)) +
   geom_line() +
@@ -185,10 +189,10 @@ plot_pacf(pacf_df_hw)
 Box.test(df_res_hw$y, lag = 12, type = 'Ljung-Box')
 
 # ============================================================================
-# Comparación de modelos: SARIMA vs Holt-Winters
+# Comparaciï¿½n de modelos: SARIMA vs Holt-Winters
 # ============================================================================
 
-# Métricas de error
+# Mï¿½tricas de error
 rmse_sarima = sqrt(mean(mod$residuals^2))
 mae_sarima = mean(abs(mod$residuals))
 
@@ -215,7 +219,7 @@ comparison_df = data.frame(
 print(comparison_df)
 
 # ============================================================================
-# Comparación visual: Valores ajustados
+# Comparaciï¿½n visual: Valores ajustados
 # ============================================================================
 
 # Vamos a juntar los datos observados con las predicciones
@@ -235,7 +239,7 @@ comparison_plot_df = data.frame(
   hw = hw_fitted
 )
 
-# Comparación gráfica
+# Comparaciï¿½n grï¿½fica
 ggplot(data = comparison_plot_df, aes(x = time)) +
   geom_line(aes(y = actual, color = "Actual"), size = 1) +
   geom_line(aes(y = sarima, color = "SARIMA"), size = 0.8, alpha = 0.8) +
@@ -248,17 +252,17 @@ ggplot(data = comparison_plot_df, aes(x = time)) +
   theme(legend.position = "bottom")
 
 # ============================================================================
-# Resumen de la comparación
+# Resumen de la comparaciï¿½n
 # ============================================================================
 
 # Create a summary of residual diagnostics
-cat("\n====== Resumen de la comparación ======\n")
+cat("\n====== Resumen de la comparaciï¿½n ======\n")
 cat("SARIMA - Box-Ljung p-value: ")
 cat(Box.test(mod$residuals, lag = 12, type = 'Ljung-Box')$p.value, "\n")
 
 cat("Holt-Winters - Box-Ljung p-value: ")
 cat(Box.test(hw_residuals, lag = 12, type = 'Ljung-Box')$p.value, "\n")
-cat("(Valores mayores del p-value indican que los residuales son más como ruido blanco)\n")
+cat("(Valores mayores del p-value indican que los residuales son mï¿½s como ruido blanco)\n")
 
 
 
@@ -341,7 +345,7 @@ cat("RMSE:", hw_rmse_test, "\n")
 cat("MAE:", hw_mae_test, "\n")
 
 # ====================================================================
-# COMPARACIÓN EN EL CONJUNTO DE PRUEBA
+# COMPARACIï¿½N EN EL CONJUNTO DE PRUEBA
 # ====================================================================
 
 comparison_test_df = data.frame(
@@ -354,7 +358,7 @@ print(comparison_test_df)
 cat("\nMejor modelo (menor RMSE):", comparison_test_df$Model[which.min(comparison_test_df$RMSE)], "\n")
 
 # ====================================================================
-# VISUALIZACIÓN: Predicciones vs Valores Reales en Test Set
+# VISUALIZACIï¿½N: Predicciones vs Valores Reales en Test Set
 # ====================================================================
 
 # Creamos un dataframe con los resultados
@@ -365,7 +369,7 @@ test_comparison_plot = data.frame(
   hw_pred = as.numeric(hw_predictions)
 )
 
-# Gráfica
+# Grï¿½fica
 ggplot(data = test_comparison_plot, aes(x = time)) +
   geom_line(aes(y = actual, color = "Actual"), size = 1) +
   geom_line(aes(y = sarima_pred, color = "SARIMA"), size = 0.8, alpha = 0.8, linetype = "dashed") +
