@@ -22,14 +22,10 @@ library(ggplot2)
 library(forecast)
 library(tseries)
 library(TSA)
-library(astsa)        # Version 2.3
-library(ggthemes)     # Version 5.1.0
-library(dplyr)        # Version 1.1.4
-library(tseries)      # Version 0.10-58
-library(here)         # Version 1.0.1
-library(forecast)     # Version 8.24.0    
-library(TSA)          # Version 1.3.1
+library(astsa)      # Version 2.3
+library(ggthemes)   # Version 5.1.0
 library(gridExtra)
+library(skimr)
 ```
 
 
@@ -40,6 +36,8 @@ library(gridExtra)
 ```{r Data}
 data <- read.csv(here("Data", "Milk_and_Pigs_Slaughtered.csv"), header = TRUE)
 head(data)
+
+skim(data)
 ```
 
 
@@ -49,11 +47,175 @@ skim(data$milk)
 
 ```
 
+```{r}
+# Separando los datos desde un principio para no tener data leakage
 
+milk <- data$milk   
+n <- length(milk)     # 120
+train_size <- floor(0.8 * n)   # 96
+
+train <- milk[1:train_size]    # posiciones 1 a 96
+test  <- milk[(train_size+1):n] # posiciones 97 a 120
+
+```
 
 
 ```{r,  fig.height=4, fig.width=7}
 #Poniendo la grafica de nuestra serie de tiempo
-ggtsdisplay(data$milk)
+ggtsdisplay(train)
 
 ```
+
+```{r,  fig.height=4, fig.width=7}
+#Graficando el periodograma
+periodogram(train,ylab='Variable x Periodogram')
+# nuestro periodo es de 12 o 13, se debe de dividir el que se sale, entre 1 
+```
+
+
+```{r}
+# Sacando los valores del periodograma
+p <- periodogram(train)
+
+idx <- which.max(p$spec)
+pico_freq <- p$freq[idx]
+pico_spec <- p$spec[idx]
+pico_freq
+pico_spec
+
+#El punto donde aparece el mayor pico es en 0.83333
+# => 1/0.83333 = 12
+# Por lo tanto, nuestro periodo es de 12 meses
+
+```
+
+
+
+```{r,  fig.height=4, fig.width=7}
+
+resultado <- diff(train, lag =12)#Haciendo la serie estacionaria
+ggtsdisplay(resultado)
+```
+
+
+```{r}
+Box.test(resultado,type='Ljung-Box')
+#H0: No hay autocorrelacion => es un ruido blanco 
+
+```
+
+
+
+```{r}
+fit <- Arima(train, order=c(1,1,0),
+             seasonal=list(order=c(0,1,1), period=12))
+
+summary(fit)
+#AIC=1298.15
+```
+
+
+```{r}
+checkresiduals(fit)
+```
+
+
+# Mas modelo 
+
+```{r}
+fit2 <- Arima(train, order=c(1,1,1),
+             seasonal=list(order=c(1,1,1), period=12))
+
+summary(fit2)
+#AIC=1299.88
+```
+
+
+```{r}
+checkresiduals(fit2)
+```
+
+
+
+# Haciendo el forescast
+
+
+```{r}
+train_ts <- ts(train, frequency = 12)
+test_ts  <- ts(test,  frequency = 12)
+
+```
+
+
+```{r}
+# Horizonte = tamaño del conjunto de prueba
+h <- length(test_ts)
+
+# Pronósticos usando solo el modelo entrenado en train
+fc <- forecast(fit, h = h)
+
+```
+
+
+```{r}
+accuracy(fc, test_ts)
+
+```
+
+
+```{r}
+autoplot(fc) +
+  autolayer(test_ts, series = "Test", PI = FALSE) +
+  xlab("Tiempo") + ylab("Milk") +
+  ggtitle("Pronóstico vs datos de prueba")
+
+```
+
+
+```{r}
+# Datos como ts sólo para el entrenamiento
+train_ts <- ts(train, frequency = 12)
+
+# Ajustas el modelo SOLO con train_ts
+fit <- Arima(train_ts, order = c(1,1,1), seasonal = c(1+,1,1))
+
+# Horizonte = tamaño del test
+h <- length(test)
+
+# Pronóstico
+fc <- forecast(fit, h = h)
+
+# Métricas sin broncas de tiempo
+accuracy(fc, test)
+
+# Gráfica: test alineado al final
+test_ts <- ts(
+  test,
+  frequency = 12,
+  start = end(train_ts) + c(0, 1)  # empieza justo después del train
+)
+
+autoplot(fc) +
+  autolayer(test_ts, series = "Test", PI = FALSE) +
+  xlab("Tiempo") +
+  ylab("Milk") +
+  ggtitle("Pronóstico vs datos de prueba")
+
+```
+
+
+```{r}
+# Métricas sin broncas de tiempo
+accuracy(fc, test)
+```
+
+Arima(train_ts, order = c(1,1,1), seasonal = c(1,1,1))  ------->    2142.1961
+Arima(train_ts, order = c(1,1,0), seasonal = c(1,1,1))  ------->    2144.6372
+Arima(train_ts, order = c(1,1,2), seasonal = c(1,1,1))  ------->    2145.579 
+Arima(train_ts, order = c(2,1,1), seasonal = c(1,1,1))  ------->    2145.579
+
+
+
+
+
+Arima(train_ts, order = c(1,1,1), seasonal = c(0,1,1))  ------->    2201.4580
