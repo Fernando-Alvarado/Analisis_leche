@@ -68,12 +68,12 @@ modelos de naturaleza distinta y proporciona una estimación más directa
 del desempeño predictivo futuro.
 
 | Modelo       | p   | q   | RMSE     | AIC      |
-|--------------|-----|-----|----------|----------|
+| ------------ | --- | --- | -------- | -------- |
 | SARIMA 1     | 1   | 1   | 2142.196 | 1299.884 |
 | SARIMA 2     | 2   | 1   | 2145.579 | 1301.842 |
 | SARIMA 3     | 1   | 2   | 2145.579 | 1301.84  |
 | SARIMA 4     | 2   | 2   | 2187.612 | 1298.838 |
-| Holt-Winters | \-  | \-  | 3144.533 | 1101.409 |
+| Holt-Winters | \-  | \-  | 3144.533 | \-       |
 
 El modelo SARIMA(1,1,1)(1,1,1)12 minimizó el RMSE, por lo que fue
 seleccionado para el análisis posterior.
@@ -111,7 +111,7 @@ predicciones.
 seleccionado](images/sarima_prediccion.png)
 
 Según el modelo, la producción proyectada de la empresa dentro de 12
-meses será de **81,855.12 galones de leche**.
+meses será de **81,855 galones de leche**.
 
 ### Riesgo de la predicción.
 
@@ -119,8 +119,8 @@ Como consultora, es fundamental comunicar al cliente no solo la
 predicción puntual, sino también una medida de incertidumbre asociada.
 
 Para nuestro caso, las bandas de confianza son pequeña, para 12 meses
-tenemos un intervalo de $\pm$ $3629.86$ galones alrededor de la media
-(el intervalo de confianza es ($78225.26,85484.98$) ). Hay un 95% de
+tenemos un intervalo de $\pm$ $3629$ galones alrededor de la media
+(el intervalo de confianza es ($78225,85484$) ). Hay un 95% de
 probabilidad de que no se cumpla la predicción que se está dando, 2.5%
 que esté arriba y 2.5% que esté abajo (caso desfavorable.)
 
