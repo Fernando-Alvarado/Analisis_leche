@@ -8,12 +8,10 @@ library(TSA)          # Version 1.3.1
 library(here)         # Version 1.0.1
 
 
-
-
-source(here("ShinyApp", "Modulos" ,"plot_ts.R"))
+source(here("ShinyApp", "modulos", "plot_ts.R"))
 
 ## Leemos los datos
-milk = read.csv(here("Data", "Milk_and_Pigs_Slaughtered.csv"), header = TRUE)
+milk = read.csv(here("Data", "Milk_and_Pigs_Slaughtered.csv"))
 milk = milk$milk
 milk = ts(milk)
 plot_TS(milk)
@@ -46,6 +44,8 @@ head(order(period_temp$spec,decreasing=T))
 diff_lag_milk = diff(milk_diff, lag = 12)
 n = length(diff_lag_milk)
 
+plot_TS(diff_lag_milk)
+
 # ACF diferenciado lag 12
 acf_resdiff = acf(diff_lag_milk,lag.max=30,plot=F)
 lag = acf_resdiff$lag[,1,]
@@ -63,6 +63,8 @@ u = rep(1.96/sqrt(n_diff),30)
 l = -u
 pacf_diff = data.frame(lag,val,u,l)  
 plot_pacf(pacf_diff)
+
+checkresiduals(diff_lag_milk)
 
 # Model for Xt Milk
 mod = Arima(milk, order = c(1,1,1), 
@@ -110,25 +112,23 @@ checkresiduals(mod)
 # Ajustamos el modelo
 # Usamos un ajueste aditivo ya que parece haber ciclos y la amplitud de 
 # nuestro ciclo no se modifica con el paso del tiempo
-milk = read.csv(here("Data", "Milk_and_Pigs_Slaughtered.csv"), header = TRUE)
+
+milk = read.csv(here("Data", "Milk_and_Pigs_Slaughtered.csv"))
 milk = milk$milk
 milk = ts(milk, frequency = 12)
 hw_model = HoltWinters(milk, 
                        seasonal = "additive",
                        start.periods = 12)
 
-
-
-
 print(hw_model)
 summary(hw_model)
 
-## Observemos los residuales, la gr�fica no parece tan convincente, pero 
+## Observemos los residuales, la gráfica no parece tan convincente, pero 
 # pero no es evidencia para concluir.
 checkresiduals(hw_model)
 
 # ============================================================================
-# Predicci�n con Holt-Winters
+# Predicci?n con Holt-Winters
 # ============================================================================
 
 # Predecimos 24 meses
@@ -136,12 +136,12 @@ hw_forecast = forecast(hw_model, h = 24)
 
 # Graficamos
 plot(hw_forecast, 
-     main = "Holt-Winters Predicci�n",
+     main = "Holt-Winters Predicci?n",
      ylab = "Milk Production",
      xlab = "Time")
 
 # ============================================================================
-# An�lisis de residuales
+# An?lisis de residuales
 # ============================================================================
 
 # Hacemos un dataframe con los residuales del modelo
@@ -149,7 +149,7 @@ hw_residuals = residuals(hw_model)
 n_hw = length(hw_residuals)
 df_res_hw = data.frame(x = c(1:n_hw), y = as.numeric(hw_residuals))
 
-# Graficamos los residuales, la gr�fica es muy parecida a la de los 
+# Graficamos los residuales, la gr?fica es muy parecida a la de los 
 # residuales del SARIMA
 ggplot(data = df_res_hw, aes(x = x, y = y)) +
   geom_line() +
@@ -189,10 +189,10 @@ plot_pacf(pacf_df_hw)
 Box.test(df_res_hw$y, lag = 12, type = 'Ljung-Box')
 
 # ============================================================================
-# Comparaci�n de modelos: SARIMA vs Holt-Winters
+# Comparaci?n de modelos: SARIMA vs Holt-Winters
 # ============================================================================
 
-# M�tricas de error
+# M?tricas de error
 rmse_sarima = sqrt(mean(mod$residuals^2))
 mae_sarima = mean(abs(mod$residuals))
 
@@ -219,7 +219,7 @@ comparison_df = data.frame(
 print(comparison_df)
 
 # ============================================================================
-# Comparaci�n visual: Valores ajustados
+# Comparaci?n visual: Valores ajustados
 # ============================================================================
 
 # Vamos a juntar los datos observados con las predicciones
@@ -239,7 +239,7 @@ comparison_plot_df = data.frame(
   hw = hw_fitted
 )
 
-# Comparaci�n gr�fica
+# Comparaci?n gr?fica
 ggplot(data = comparison_plot_df, aes(x = time)) +
   geom_line(aes(y = actual, color = "Actual"), size = 1) +
   geom_line(aes(y = sarima, color = "SARIMA"), size = 0.8, alpha = 0.8) +
@@ -252,17 +252,17 @@ ggplot(data = comparison_plot_df, aes(x = time)) +
   theme(legend.position = "bottom")
 
 # ============================================================================
-# Resumen de la comparaci�n
+# Resumen de la comparaci?n
 # ============================================================================
 
 # Create a summary of residual diagnostics
-cat("\n====== Resumen de la comparaci�n ======\n")
+cat("\n====== Resumen de la comparaci?n ======\n")
 cat("SARIMA - Box-Ljung p-value: ")
 cat(Box.test(mod$residuals, lag = 12, type = 'Ljung-Box')$p.value, "\n")
 
 cat("Holt-Winters - Box-Ljung p-value: ")
 cat(Box.test(hw_residuals, lag = 12, type = 'Ljung-Box')$p.value, "\n")
-cat("(Valores mayores del p-value indican que los residuales son m�s como ruido blanco)\n")
+cat("(Valores mayores del p-value indican que los residuales son m?s como ruido blanco)\n")
 
 
 
@@ -274,7 +274,7 @@ cat("(Valores mayores del p-value indican que los residuales son m�s como ruid
 # ====================================================================
 
 # Cargamos los datos
-milk = read.csv(here("Milk and Pigs Slaughtered.csv"))
+milk = read.csv(here("Data", "Milk_and_Pigs_Slaughtered.csv"))
 milk = milk$milk
 milk = ts(milk)
 
@@ -295,9 +295,9 @@ cat("Test set size:", length(milk_test), "\n")
 # ====================================================================
 
 # Ajustamos el SARIMA solo con el conjunto de entrenamiento
-mod_train = Arima(milk_train, order = c(1,1,1), 
-                  seasonal = list(order=c(1,1,1), period=12))
-
+mod_train = Arima(milk_train, order = c(2,1,2), 
+                  seasonal = list(order=c(1,1,1), period=12));mod_train$aic
+summary(mod_train)
 print(mod_train)
 
 # Hacemos predicciones en el conjunto de prueba
@@ -317,7 +317,7 @@ cat("MAE:", sarima_mae_test, "\n")
 
 # Ajustamos Holt-Winters solo con el conjunto de entrenamiento
 
-milk = read.csv(here("Milk and Pigs Slaughtered.csv"))
+milk = read.csv(here("Data", "Milk_and_Pigs_Slaughtered.csv"))
 milk = milk$milk
 milk = ts(milk, frequency = 12)
 
@@ -332,6 +332,7 @@ hw_model_train = HoltWinters(milk_train,
                              seasonal = "additive")
 
 print(hw_model_train)
+checkresiduals(hw_model_train)
 
 # Hacemos predicciones en el conjunto de prueba
 hw_predictions = forecast(hw_model_train, h = length(milk_test))$mean
@@ -340,12 +341,20 @@ hw_predictions = forecast(hw_model_train, h = length(milk_test))$mean
 hw_rmse_test = sqrt(mean((milk_test - hw_predictions)^2))
 hw_mae_test = mean(abs(milk_test - hw_predictions))
 
+#Obtenemos AIC del modelo Holt-Winters entrenado
+hw_residuals_train = residuals(hw_model_train)
+n_hw_train = length(hw_residuals_train)
+sse_hw_train = sum(hw_residuals_train^2)
+k_hw_train = 3 + 3  # Parametros exp smoothing: alpha, beta, gamma smoothing parameters
+aic_hw_train = 2*k_hw_train + n_hw_train*log(sse_hw_train/n_hw_train)
+
+
 cat("\n====== Holt-Winters Test Set Performance ======\n")
 cat("RMSE:", hw_rmse_test, "\n")
 cat("MAE:", hw_mae_test, "\n")
 
 # ====================================================================
-# COMPARACI�N EN EL CONJUNTO DE PRUEBA
+# COMPARACI?N EN EL CONJUNTO DE PRUEBA
 # ====================================================================
 
 comparison_test_df = data.frame(
@@ -358,7 +367,7 @@ print(comparison_test_df)
 cat("\nMejor modelo (menor RMSE):", comparison_test_df$Model[which.min(comparison_test_df$RMSE)], "\n")
 
 # ====================================================================
-# VISUALIZACI�N: Predicciones vs Valores Reales en Test Set
+# VISUALIZACI?N: Predicciones vs Valores Reales en Test Set
 # ====================================================================
 
 # Creamos un dataframe con los resultados
@@ -369,7 +378,7 @@ test_comparison_plot = data.frame(
   hw_pred = as.numeric(hw_predictions)
 )
 
-# Gr�fica
+# Gr?fica
 ggplot(data = test_comparison_plot, aes(x = time)) +
   geom_line(aes(y = actual, color = "Actual"), size = 1) +
   geom_line(aes(y = sarima_pred, color = "SARIMA"), size = 0.8, alpha = 0.8, linetype = "dashed") +
@@ -394,9 +403,9 @@ mod_final = Arima(milk, order = c(1,1,1),
 hw_model_final = HoltWinters(ts(milk, frequency = 12), seasonal = "additive", start.periods = 12)
 
 # Predicciones futuras
-sarima_future = forecast(mod_final, h = 24)
+sarima_future = forecast(mod_final, h = 12)
 hw_future = forecast(hw_model_final, h = 24)
 
 # Visualizar predicciones futuras
-plot(sarima_future, main = "SARIMA: Predicciones Futuras")
+plot(sarima_future, main = "SARIMA: Predicciones a un a?o")
 plot(hw_future, main = "Holt-Winters: Predicciones Futuras")
