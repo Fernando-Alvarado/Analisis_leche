@@ -5,56 +5,92 @@ editor_options:
 output: pdf_document
 ---
 
-# Reporte
+# Análisis Estadístico y Pronóstico de la Producción Mensual de Leche
+
+
+El conjunto de datos utilizado en este análisis corresponde a una serie temporal mensual de producción de leche, con una extensión de 120 meses (equivalente a 10 años de observaciones continuas). Cada dato representa la cantidad de producto generada por la empresa en un mes específico, permitiendo estudiar el comportamiento histórico de la producción, así como identificar tendencias, estacionalidades y posibles anomalías.
+
+La inspección inicial de la serie (Figura 1) revela una tendencia creciente a lo largo del periodo analizado, lo cual indica que la producción ha mostrado un aumento sostenido con el paso del tiempo. Asimismo, es evidente la presencia de un patrón estacional anual, caracterizado por oscilaciones regulares que se repiten aproximadamente cada 12 meses. Este comportamiento estacional es típico en industrias agroalimentarias, donde factores climáticos, ciclos biológicos y condiciones de demanda afectan la producción de manera periódica.
+
+Dado que la serie exhibe tendencia y estacionalidad, puede concluirse que no es estacionaria en su forma original. Esto implica que, previo a la construcción de un modelo de pronóstico, se requiere aplicar transformaciones adecuadas (como diferenciación estacional y/o logaritmos) para estabilizar la varianza y las medias en el tiempo.
+
+
+![Serie de tiempo de la base de datos Milk](images/milk_ts_graph.png){width=80% fig-pos=H}
+
+
 
 ## Limpieza de datos.
 
-Los datos no presentan outliers ni requieren preprocesamiento adicional,
-por lo que se utilizaron los datos crudos.
+Antes de realizar el análisis, se efectuó una revisión exploratoria de la serie para identificar valores atípicos, datos faltantes o inconsistencias. Se emplearon visualizaciones como el gráfico de la serie temporal y diagramas de caja por año, así como una inspección de estadísticos descriptivos básicos.
 
-## Visualización de la serie de tiempo
+A partir de esta revisión no se detectaron outliers significativos, valores faltantes ni patrones anómalos que requirieran un preprocesamiento adicional. Por ello, el análisis se llevó a cabo utilizando los datos originales sin modificaciones.
 
-![Serie de tiempo de la base de datos Milk](images/milk_ts_graph.png)
 
-Se observa una tendencia creciente y un patrón estacional claro en los
-datos. Esto sugiere una empresa cuya producción va incrementándose con
-ciclos anuales, típicos de la industria. La serie no es estacionaria en
-su forma original.
+## Transformación y Estacionarización de la Serie
 
-Aplicando la transformación:
+La serie original presenta una tendencia creciente y un marcado componente estacional anual, por lo que no cumple con los supuestos de estacionariedad requeridos para la modelación mediante **SARIMA**. Con el fin de estabilizar la media y eliminar estos patrones sistemáticos, se aplicó la siguiente transformación combinada:
 
-$$Y_t = (1-B)(1-B^{12})X_t $$
+$$Y_t = (1-B)(1-B^{12})X_t$$
 
-se obtiene una serie estacionaria, como se aprecia en la **Figura 2**:
 
-![Serie de tiempo tras diferenciar una vez y diferenciar con lag igual a
-12](images/milk_diff_lag12.png)
 
-## Exploración de modelos.
+donde \(B\) representa el operador rezago. Esta transformación incluye:
 
-De acuerdo a la transformación anterior, el espacio de modelos será el
-$SARIMA(p, d=1, q)x(1, 1, 1)_{12}$ También exploraremos el modelo
-Holt-Winters como una alternativa complementaria.
+- **Diferenciación regular** (Elimina la tendencia) $$(1 - B)$$  
 
-### Ajuste de modelos.
 
-Ajustamos varios modelos SARIMA, variando las $p,q$ en un rango
-razonable, y para todos los casos obtenemos residuales que no están
-autocorrelacionados, Ljung-Box no rechaza H0 y sus predicciones se ven
-razonables. Sin criterios adicionales, no hay razón a priori para
-preferir un modelo sobre otro.
+- **Diferenciación estacional** (remueve el ciclo anual identificado previamente) $$(1 - B^{12})$$ 
 
-A continuación se muestran los residuales de los modelos evaluados
-(**Figura 3-5**):
 
-![Residuales del modelo
-SARIMA(1,1,1)(1,1,1)12](images/residuals_sarima_111111.png)
 
-![Residuales del modelo
-SARIMA(2,1,1)(1,1,1)12](images/residuals_sarima_211111.png)
+Tras aplicar ambas diferenciaciones, la serie resultante presenta una media aproximadamente constante, ausencia de estructura estacional visible y variabilidad más estable, lo cual sugiere que se logró obtener una serie razonablemente estacionaria. Esto puede observarse en la **Figura 2**, donde se muestra la serie transformada.
 
-![Residuales del modelo
-SARIMA(2,1,2)(1,1,1)12](images/residuals_sarima_212111.png)
+
+
+![Serie de tiempo tras diferenciar una vez y diferenciar con lag igual a 12](images/milk_diff_lag12.png){width=80% fig-pos=H}
+
+
+
+
+## Exploración de modelos
+
+A partir de la transformación aplicada previamente, la estructura adecuada para modelar la serie es un modelo **SARIMA**, el cual permite capturar tanto la dinámica regular como la dinámica estacional anual observada en los datos. Dado que la serie fue diferenciada una vez (d = 1) y se aplicó una diferenciación estacional anual (D = 1), el espacio de modelos a considerar se define como:
+
+$$
+\text{SARIMA}(p,\,1,\,q)\,(1,\,1,\,1)_{12}
+$$
+
+donde los órdenes \(p, q, P\) serán determinados mediante la inspección de las funciones ACF y PACF de la serie transformada.
+
+Además del enfoque SARIMA, se considerará el modelo **Holt–Winters** como alternativa complementaria, especialmente útil para series con tendencia y estacionalidad marcadas.
+
+
+
+## Ajuste de modelos
+
+Se estimaron diferentes modelos SARIMA explorando combinaciones razonables de los parámetros \(p\) y \(q\), manteniendo los órdenes de diferenciación previamente establecidos. En todos los casos, los diagnósticos de los residuos indican ausencia de autocorrelación significativa y la prueba de Ljung–Box no rechaza la hipótesis nula, lo que sugiere que los modelos ajustan adecuadamente la estructura temporal de la serie.
+
+Dado que varios modelos cumplen los criterios de diagnóstico, la selección se realizó comparando el **RMSE** obtenido por cada uno. Este indicador permitió identificar el modelo con mejor desempeño predictivo dentro del conjunto evaluado.
+
+A continuación, se presentan los residuos de los modelos analizados (Figuras 3–5).
+
+
+
+![Residuales del modelo SARIMA(1,1,1)(1,1,1)12](images/residuals_sarima_111111.png){width=80% fig-pos=H}
+
+
+
+
+![Residuales del modelo SARIMA(2,1,1)(1,1,1)12](images/residuals_sarima_211111.png){width=80% fig-pos=H}
+
+
+
+
+![Residuales del modelo SARIMA(2,1,2)(1,1,1)12](images/residuals_sarima_212111.png){width=80% fig-pos=H}
+
+
+
+
 
 ### Selección del modelo.
 
@@ -82,7 +118,7 @@ La siguiente gráfica muestra la comparación entre las predicciones de
 los modelos SARIMA y Holt-Winters frente a los datos reales (**Figura
 6**):
 
-![SARIMA vs Holt-Winters](images/sarima_vs_holt.png)
+![SARIMA vs Holt-Winters](images/sarima_vs_holt.png){width=80% fig-pos=H}
 
 ### Validación del modelo.
 
@@ -93,11 +129,15 @@ Las siguientes gráficas muestran los residuales del modelo (**Figura
 7**); el ACF de los residuales (**Figura 8**); y el PACF de los
 residuales (**Figura 9**):
 
-![Resiudales modelo seleccionado](images/residuales_modelo.png)
 
-![ACF modelo seleccionado](images/acf_modelo.png)
+![Resiudales modelo seleccionado](images/residuales_modelo.png){width=80% fig-pos=H}
 
-![PACF modelo seleccionado](images/pacf_modelo.png)
+
+![ACF modelo seleccionado](images/acf_modelo.png){width=80% fig-pos=H}
+
+
+![PACF modelo seleccionado](images/pacf_modelo.png){width=80% fig-pos=H}
+
 
 Los residuales presentan un comportamiento adecuado, permaneciendo
 dentro de las bandas de confianza. La prueba Ljung-Box no rechaza $H_0$
@@ -107,8 +147,11 @@ predicciones.
 
 ### Predicción a 1 año.
 
-![Predicción a 12 meses con base en el modelo
-seleccionado](images/sarima_prediccion.png)
+
+
+![Predicción a 12 meses con base en el modelo seleccionado](images/sarima_prediccion.png){width=80% fig-pos=H}
+
+
 
 Según el modelo, la producción proyectada de la empresa dentro de 12
 meses será de **81,855 galones de leche**.
@@ -126,11 +169,6 @@ que esté arriba y 2.5% que esté abajo (caso desfavorable.)
 
 ### Conclusiones
 
-El dataset utilizado es relativamente simple y no presenta outliers ni
-volatilidad significativa, lo que permitió identificar un modelo de
-fácil interpretación y con predicciones confiables.
+El análisis comparativo entre los modelos evaluados permitió identificar que el SARIMA(1,1,1)(1,1,1)_{12} obtuvo el menor RMSE, por lo que fue seleccionado como el modelo final. Los diagnósticos de residuos y la prueba de Ljung–Box indican que el modelo reproduce adecuadamente la dinámica temporal de la serie y que los errores no presentan autocorrelación, validando su capacidad predictiva.
 
-La empresa exhibe una tendencia clara de crecimiento. El modelo SARIMA
-seleccionado captura adecuadamente esta dinámica, permitiendo estimar
-las ventas futuras de forma razonable y proporcionar al cliente una
-medida cuantificable del riesgo asociado a la predicción.
+Con este modelo, se proyecta que la producción dentro de 12 meses será aproximadamente de 81,855 galones, acompañada de un intervalo de confianza estrecho, lo que refleja una predicción confiable. En conjunto, los resultados proporcionan una estimación robusta que puede apoyar la planeación operativa y la toma de decisiones de la empresa.
