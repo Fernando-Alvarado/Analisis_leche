@@ -177,7 +177,7 @@ autoplot(fc) +
 train_ts <- ts(train, frequency = 12)
 
 # Ajustas el modelo SOLO con train_ts
-fit <- Arima(train_ts, order = c(1,1,1), seasonal = c(1+,1,1))
+fit <- Arima(train_ts, order = c(1,1,1), seasonal = c(1,1,1))
 
 # Horizonte = tamaño del test
 h <- length(test)

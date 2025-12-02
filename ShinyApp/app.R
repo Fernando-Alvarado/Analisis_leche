@@ -6,6 +6,8 @@ library(here)
 #source("Modulos/graficas.r")
 
 source(here("ShinyApp", "Modulos", "modelo_Holt_Winters.r"))  # si aquí tienes módulos, está bien
+source(here("ShinyApp", "Modulos", "comparativo.r"))  
+
 
 ui <- page_fixed(
    # ===== TÍTULO PRINCIPAL =====
@@ -62,9 +64,38 @@ ui <- page_fixed(
         plotOutput("plotPACFresiduos", height = "260px")
       )
     )
-  )
-)
+  ),
+ # Poniendo otras separacion a nuestro dash
+  tags$br(),
 
+   card(
+    card_header("Comparativa de modelos propuestos y sus residuos"),
+    navset_pill_list(
+      id = "tabs_hw",
+
+      nav_panel(
+        "Modelo: (1,1,1)(1,1,1)_12",
+        plotOutput("primerFor", height = "260px"), 
+        h5("Residuales del modelo: (1,1,1)(1,1,1)_12"),
+        plotOutput("residuales1", height = "260px")
+      ),
+      nav_panel(
+            "Modelo: (1,1,0)(1,1,1)_12",
+            plotOutput("segundoFor", height = "260px"),
+            h5("Residuales del modelo:"),
+            plotOutput("residuales2", height = "260px")
+      ),
+       nav_panel(
+            "Modelo: (1,1,2)(1,1,1)_12",
+            plotOutput("tercerFor", height = "260px"),
+            h5("Residuales del modelo:"),
+            plotOutput("residuales3", height = "260px")
+      
+    )
+  )
+  #Aqui voy a poner los modelos que se compararon 
+)
+)
 
 
 
@@ -99,6 +130,28 @@ server <- function(input, output, session) {
     output$plotPACFresiduos <- renderPlot({
         prueba()[[7]]   # o prueba()$pacf_df_hw
         })
+    # ================================================================================    
+    # Haciendo las graficas de los forecaste de los distitos modelos que comparamos 
+    output$primerFor <- renderPlot({
+        forecastProduccion(c(1,1,1), c(1,1,1))
+    })
+    output$segundoFor <- renderPlot({
+        forecastProduccion(c(1,1,0), c(1,1,1))
+    })
+    output$tercerFor <- renderPlot({
+       forecastProduccion(c(2,1,1), c(1,1,1))
+    })
+    # =================================================================================
+    #  Poniendo las graficas de los residulos de los distitnos modelos
+    output$residuales1 <- renderPlot({
+        residualesModelos(c(1,1,1), c(1,1,1))
+    })
+    output$residuales2 <- renderPlot({
+        residualesModelos(c(1,1,0), c(1,1,1))
+    })
+    output$residuales3 <- renderPlot({
+        residualesModelos(c(2,1,1), c(1,1,1))
+    })
 
 }
 
