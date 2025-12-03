@@ -67,8 +67,17 @@ plot_pacf(pacf_diff)
 checkresiduals(diff_lag_milk)
 
 # Model for Xt Milk
-mod = Arima(milk, order = c(1,1,1), 
+mod = Arima(milk, order = c(2,1,2), 
             seasonal = list(order=c(1,1,1),period=12));mod
+#checkresiduals(mod, main="SARIMAASDASD")  
+
+p <- ggtsdisplay(residuals(mod), plot.type = "histogram", main= "Residuals from SARIMA(2,1,2)(1,1,1)[12]")
+
+p <- p + labs(y = "value", x = "residuals")
+
+print(p, vp = grid::viewport(layout.pos.row = 2, layout.pos.col = 2))
+
+
 
 # Residuals of Xt Milk
 n=length(mod$residuals)
