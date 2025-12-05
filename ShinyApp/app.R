@@ -5,13 +5,13 @@ library(here)
 # Importando los modulos
 #source("Modulos/graficas.r")
 
-source(here("ShinyApp", "modulos", "modelo_Holt_Winters.r"))  # si aquí tienes módulos, está bien
+source(here("ShinyApp", "modulos", "modelo_Holt_Winters.r"))  # si aquC- tienes modulos, estC! bien
 source(here("ShinyApp", "modulos", "comparativo.r"))  
 source(here("ShinyApp", "modulos", "holt.r"))  
 
 
 ui <- page_fixed(
-  title = "Forecasting Estratégico para la Industria Lechera",
+  title = "Forecasting EstratC)gico para la Industria Lechera",
   theme = bslib::bs_theme(
     version   = 5,
     bootswatch = "flatly",
@@ -80,24 +80,24 @@ ui <- page_fixed(
     "))
   ),
 
-  # ===== TÍTULO PRINCIPAL CON LOGOS =====
+  # ===== TITULO PRINCIPAL CON LOGOS =====
   div(
     class = "app-title-bar d-flex align-items-center justify-content-between",
 
-    # Logos (pon tus archivos en /www; si no existen, no crashea, sólo no se ven)
+    # Logos (pon tus archivos en /www; si no existen, no crashea, solo no se ven)
     div(
       class = "d-flex align-items-center"
     ),
 
-    # Título y subtítulo
+    # TC-tulo y subtC-tulo
     div(
       class = "flex-grow-1 text-center",
       h2(class = "app-title mb-1",
-         "📈 Forecasting Estratégico para la Industria Lechera"
+         "Plot Forecasting Estrategico para la Industria Lechera"
       ),
       div(
         class = "app-subtitle",
-        "Modelos SARIMA y Holt-Winters para la planeación de la producción mensual"
+        "Modelos SARIMA y Holt-Winters para la planeacion de la produccion mensual"
       )
     ),
 
@@ -105,17 +105,17 @@ ui <- page_fixed(
     div()
   ),
 
-  # ---- FILA SUPERIOR: Configuración + Forecast ----
+  # ---- FILA SUPERIOR: Configuracion + Forecast ----
   layout_columns(
     col_widths = c(3, 9),
 
-    # Panel Izquierdo (Recuadro de configuración)
+    # Panel Izquierdo (Recuadro de configuracion)
     card(
       class = "card-dashboard",
-      card_header(div(class = "card-header-main", "Configuración del modelo")),
+      card_header(div(class = "card-header-main", "Configuracion del modelo")),
       div(
         class = "mb-2 text-muted small",
-        icon("sliders"), " Ajusta el horizonte de pronóstico"
+        icon("sliders"), " Ajusta el horizonte de pronostico"
       ),
       sliderInput(
         inputId = "bins",
@@ -127,20 +127,20 @@ ui <- page_fixed(
       )
     ),
 
-    # Panel Derecho (Gráfica principal)
+    # Panel Derecho (GrC!fica principal)
     card(
       class = "card-dashboard",
-      card_header(div(class = "card-header-main", "Pronóstico Holt-Winters")),
+      card_header(div(class = "card-header-main", "Pronostico SARIMA(1,1,1)(1,1,1)[12]")),
       plotOutput("forecastHolt", height = "350px")
     )
   ),
 
   tags$br(),
 
-  # ---- FILA INFERIOR: Diagnóstico de residuales ----
+  # ---- FILA INFERIOR: Diagnostico de residuales ----
   card(
     class = "card-dashboard",
-    card_header(div(class = "card-header-main", "Diagnóstico de residuales")),
+    card_header(div(class = "card-header-main", "Diagnostico de residuales")),
     navset_pill_list(
       id = "tabs_hw",
     
@@ -210,7 +210,7 @@ server <- function(input, output, session) {
     holtWinter(milk, ventana_pred = input$bins)
   })
 
-  # 2) Pronóstico principal
+  # 2) Pronostico principal
   output$forecastHolt <- renderPlot({
     # si pronosticoHolt ya es un ggplot, esto basta
     prueba()[[3]]   # o prueba()$pronosticoHolt

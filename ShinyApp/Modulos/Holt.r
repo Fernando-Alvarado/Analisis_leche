@@ -30,7 +30,7 @@ test  <- milk[(train_size + 1):n]
 
 train_ts <- ts(train, frequency = 12)
 
-h <- 12
+h <- 24
 test12    <- test[1:h]
 test12_ts <- ts(test12,
                 start = tsp(train_ts)[2] + 1/12,
@@ -49,6 +49,9 @@ print(acc_hw)
 
 rmseTrain_hw <- acc_hw["Training set", "RMSE"]
 rmseTest_hw  <- acc_hw["Test set",  "RMSE"]
+forecast::accuracy(fc_hw, test12)
+
+
 
 # AIC NUMÉRICO
 aic_hw <- ets_hw$aic

@@ -89,11 +89,9 @@ forecastProduccion <- function(vector1, vector2){
 # Funcion encargada de hacer las graficas de los residuales del modelo
 
 residualesModelos <- function( vector1, vector2){
-    fit <- Arima(train, order=vector1,seasonal=vector2)
-    return(checkresiduals(fit))
+    fit <- Arima(train, order=vector1,seasonal=list(order=vector2, period=12))
+    return(checkresiduals(fit, plot = TRUE))
 }
-
-
 
         #Primer modelo
         #forecast1 = forecastProduccion(c(1,1,1), c(1,1,1)),
