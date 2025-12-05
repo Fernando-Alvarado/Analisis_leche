@@ -5,9 +5,9 @@ library(here)
 # Importando los modulos
 #source("Modulos/graficas.r")
 
-source(here("ShinyApp", "Modulos", "modelo_Holt_Winters.r"))  # si aquí tienes módulos, está bien
-source(here("ShinyApp", "Modulos", "comparativo.r"))  
-source(here("ShinyApp", "Modulos", "Holt.r"))  
+source(here("ShinyApp", "modulos", "modelo_Holt_Winters.r"))  # si aquí tienes módulos, está bien
+source(here("ShinyApp", "modulos", "comparativo.r"))  
+source(here("ShinyApp", "modulos", "holt.r"))  
 
 
 ui <- page_fixed(

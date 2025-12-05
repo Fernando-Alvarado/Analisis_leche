@@ -11,7 +11,7 @@ library(here)         # Version 1.0.1
 source(here("ShinyApp", "modulos", "plot_ts.R"))
 
 ## Leemos los datos
-milk = read.csv(here("Data", "Milk_and_Pigs_Slaughtered.csv"))
+data <- read.csv(here("data", "milk_and_Pigs_Slaughtered.csv"), header = TRUE)
 milk = milk$milk
 milk = ts(milk)
 plot_TS(milk)

@@ -14,7 +14,7 @@ library(forecast)
 library(ggplot2)
 
 
-data <- read.csv(here("Data", "Milk_and_Pigs_Slaughtered.csv"), header = TRUE)
+data <- read.csv(here("data", "milk_and_Pigs_Slaughtered.csv"), header = TRUE)
 head(data)
 
 
