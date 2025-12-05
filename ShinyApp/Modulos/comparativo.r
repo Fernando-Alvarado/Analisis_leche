@@ -109,4 +109,4 @@ residualesModelos <- function( vector1, vector2){
         #residuales4 = residualesModelos(c(2,1,1), c(1,1,1)),
        
 
-forecastProduccion(c(2,1,1), c(1,1,1))
+#forecastProduccion(c(2,1,1), c(1,1,1))

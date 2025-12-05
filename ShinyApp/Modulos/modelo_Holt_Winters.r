@@ -6,6 +6,9 @@ library(tseries)      # Version 0.10-58
 library(forecast)     # Version 8.24.0  
 library(TSA)          # Version 1.3.1
 library(here)         # Version 1.0.1
+library(forecast)
+
+
 
 print(here())
 source(here("ShinyApp", "Modulos" ,"plot_ts.R"))
@@ -38,15 +41,19 @@ milk = data$milk
 # pafResiduos: Grafica el PACF de los residuales
 
 holtWinter = function(milk, ventana_pred){
-    milk = ts(milk, frequency = 12)
-    hw_model <- HoltWinters(milk, # Ajuste aditivo
-                       seasonal = "additive",
-                       start.periods = 12)
+     milk_ts <- ts(milk, frequency = 12)
+
+    # Modelo SARIMA(1,1,1)(1,1,1)[12]
+    hw_model <- Arima(
+        milk_ts,
+        order    = c(1, 1, 1),
+        seasonal = list(order = c(1, 1, 1), period = 12)
+    )
     #Haciendo la prediccion del modelolo 
     hw_forecast <- forecast(hw_model, h = ventana_pred) #Esta se va a modificar con el tiempo 
     #Hacienod la grafica de nuestro modelo 
     forcastHolt <- plot(hw_forecast, 
-                        main = "Holt-Winters Predicción",
+                        main = "Predicción de la Producción de Leche con Modelo SARIMA(1,1,1)(1,1,1)[12]",
                         ylab = "Milk Production",
                         xlab = "Time")
 
@@ -59,7 +66,7 @@ holtWinter = function(milk, ventana_pred){
     solo_residuales_hw = ggplot(data = df_res_hw, aes(x = x, y = y)) +
                             geom_line() +
                             theme_minimal() +
-                            labs(title = "Holt-Winters Residuals",
+                            labs(title = "Residuales del Modelo SARIMA(1,1,1)(1,1,1)[12]",
                                 x = '', 
                                 y = '')
 
