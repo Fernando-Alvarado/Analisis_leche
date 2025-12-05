@@ -4,10 +4,10 @@ library(bslib)
 library(here) 
 # Importando los modulos
 #source("Modulos/graficas.r")
-
-source(here("ShinyApp", "modulos", "modelo_Holt_Winters.r"))  # si aquC- tienes modulos, estC! bien
-source(here("ShinyApp", "modulos", "comparativo.r"))  
-source(here("ShinyApp", "modulos", "holt.r"))  
+print("Cargando modulos...")
+source(here( "Modulos", "modelo_Holt_Winters.r"), local = TRUE)  # si aquC- tienes modulos, estC! bien
+source(here( "Modulos", "comparativo.r"), local = TRUE)  
+source(here( "Modulos", "Holt.r"), local = TRUE)  
 
 
 ui <- page_fixed(

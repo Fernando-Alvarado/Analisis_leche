@@ -9,14 +9,12 @@ library(here)         # Version 1.0.1
 library(forecast)
 
 
-
-print(here())
-source(here("ShinyApp", "modulos" ,"plot_ts.r"))
+source(here("Modulos" ,"plot_ts.R"), local = TRUE)
 
 # Cargando los datos con los que vamos a trabajar 
 
 
-data <- read.csv(here("data", "milk_and_Pigs_Slaughtered.csv"), header = TRUE)
+data <- read.csv(here("data", "Milk_and_Pigs_Slaughtered.csv"), header = TRUE)
 
 
 # ====================================================================
